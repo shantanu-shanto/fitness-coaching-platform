@@ -3,112 +3,113 @@
 @section('title', 'Coach Dashboard')
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <h1 class="mb-4">
-            <i class="bi bi-speedometer2"></i> Coach Dashboard
-        </h1>
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1>Coach Dashboard</h1>
+        </div>
     </div>
-</div>
 
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="stat-card">
-            <h3>{{ $stats['total_clients'] }}</h3>
-            <p class="mb-0">Total Clients</p>
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="card-title text-muted">Total Clients</h6>
+                    <h2>{{ $stats['total_clients'] }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="card-title text-muted">Meal Plans</h6>
+                    <h2>{{ $stats['total_meal_plans'] }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="card-title text-muted">Workout Plans</h6>
+                    <h2>{{ $stats['total_workout_plans'] }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="card-title text-muted">Years Experience</h6>
+                    <h2>{{ Auth::user()->coachProfile->experience_years ?? 0 }}</h2>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-            <h3>{{ $stats['total_meal_plans'] }}</h3>
-            <p class="mb-0">Meal Plans</p>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-            <h3>{{ $stats['total_workout_plans'] }}</h3>
-            <p class="mb-0">Workout Plans</p>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-            <h3>{{ auth()->user()->coachProfile->experience_years }}</h3>
-            <p class="mb-0">Years Experience</p>
-        </div>
-    </div>
-</div>
 
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <a href="{{ route('coach.meal-plans.create') }}" class="btn btn-primary me-2">
-                    <i class="bi bi-plus-circle"></i> Create Meal Plan
-                </a>
-                <a href="{{ route('coach.workout-plans.create') }}" class="btn btn-primary me-2">
-                    <i class="bi bi-plus-circle"></i> Create Workout Plan
-                </a>
-                <a href="{{ route('coach.clients.list') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-people"></i> View All Clients
-                </a>
-            </div>
+    <!-- Assign Client Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Assign New Client</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('coach.clients.assign') }}" method="POST" class="row g-2">
+                @csrf
+                <div class="col-md-9">
+                    <select name="client_user_id" class="form-control" required>
+                        <option value="">-- Select Unassigned Client --</option>
+                        @forelse($unassignedClients ?? [] as $unassigned)
+                            <option value="{{ $unassigned->user_id }}">
+                                {{ $unassigned->user->name }} ({{ $unassigned->user->email }})
+                            </option>
+                        @empty
+                            <option value="">No unassigned clients available</option>
+                        @endforelse
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">Assign Client</button>
+                </div>
+            </form>
         </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Your Clients</h5>
-            </div>
-            <div class="card-body">
-                @if ($clients->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Age</th>
-                                    <th>Fitness Goal</th>
-                                    <th>Current Weight</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($clients as $client)
-                                    <tr>
-                                        <td>
-                                            <strong>{{ $client->user->name }}</strong>
-                                        </td>
-                                        <td>{{ $client->age }} years</td>
-                                        <td>{{ $client->fitness_goal }}</td>
-                                        <td>{{ $client->getLatestWeight() }} kg</td>
-                                        <td>
-                                            <a href="{{ route('coach.clients.view', $client->user_id) }}" 
-                                               class="btn btn-sm btn-info">
-                                                <i class="bi bi-eye"></i> View
-                                            </a>
-                                            <a href="{{ route('coach.clients.progress', $client->user_id) }}" 
-                                               class="btn btn-sm btn-success">
-                                                <i class="bi bi-graph-up"></i> Progress
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> No clients assigned yet. 
-                        <a href="{{ route('coach.clients.list') }}">Manage clients</a>
-                    </div>
-                @endif
-            </div>
+    <!-- Clients Table -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Your Clients</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Fitness Goal</th>
+                        <th>Current Weight</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($clients as $client)
+                        <tr>
+                            <td>{{ $client->user->name }}</td>
+                            <td>{{ $client->age }} years</td>
+                            <td>{{ $client->fitness_goal }}</td>
+                            <td>{{ $client->getLatestWeight() }} kg</td>
+                            <td>
+                                <a href="/coach/clients/{{ $client->user_id }}" class="btn btn-sm btn-info">View Progress</a>
+
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-3">
+                                No clients assigned yet
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

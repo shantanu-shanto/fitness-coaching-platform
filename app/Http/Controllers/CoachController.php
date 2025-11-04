@@ -30,8 +30,14 @@ class CoachController extends Controller
             ->with(['user', 'progressTracking'])
             ->get();
 
-        return view('coach.dashboard', compact('stats', 'clients'));
+        // Get unassigned clients for dropdown
+        $unassignedClients = ClientProfile::whereNull('coach_id')
+            ->with('user')
+            ->get();
+
+        return view('coach.dashboard', compact('stats', 'clients', 'unassignedClients'));
     }
+
 
     // List all clients
     public function listClients()

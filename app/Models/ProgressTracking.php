@@ -10,6 +10,8 @@ class ProgressTracking extends Model
 {
     use HasFactory;
 
+    protected $table = 'progress_tracking';  // ← Add this line
+
     protected $fillable = [
         'client_id',
         'log_date',
@@ -22,13 +24,11 @@ class ProgressTracking extends Model
         'log_date' => 'date',
     ];
 
-    // Client relationship
     public function client(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_id');
     }
 
-    // Calculate weight progress
     public function getWeightChange()
     {
         $previousLog = $this->client()
